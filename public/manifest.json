@@ -1,0 +1,16 @@
+{
+  "name": "LearnAI - AI 智慧學習平台",
+  "short_name": "LearnAI",
+  "description": "以 AI 驅動的全方位學習平台",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9ff",
+  "theme_color": "#4B6BFB",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
