@@ -1,30 +1,35 @@
-# AI Lab System - UI Migration Prompt
+# LearnAI 校園版 - UI Migration Prompt
 
-> **Purpose**: This is a structured prompt for an AI coding assistant (Cursor, Copilot, Claude, etc.) to migrate the LearnAI UI design into your existing AI Lab system.
+> **Purpose**: 這是一份完整的結構化 Prompt，供 AI 編碼助手（Cursor、Copilot、Claude 等）將 LearnAI 校園版 UI 設計移植到您現有的 AI Lab 系統中。
 > **Source Repository**: https://github.com/kaiyin1028/v0-ai-learning-platform
 
 ---
 
 ## PROMPT START
 
-You are a senior full-stack engineer. Your task is to migrate a complete UI design system from the **LearnAI** reference project into our existing **AI Lab** system. The reference UI is a static Next.js prototype (no backend) — you need to integrate it with our existing backend, APIs, authentication, and database.
+你是一位資深全端工程師。你的任務是將 **LearnAI 校園版** UI 設計系統移植到我們現有的 **AI Lab** 系統。參考 UI 是一個靜態的 Next.js 原型（無後端）— 你需要將其與我們現有的後端、API、認證和資料庫整合。
 
 ---
 
-### 1. PROJECT CONTEXT
+### 1. 專案背景
 
-**Reference UI Repository**: https://github.com/kaiyin1028/v0-ai-learning-platform
+**參考 UI Repository**: https://github.com/kaiyin1028/v0-ai-learning-platform
 
-**Reference Tech Stack** (UI only, no backend):
+**目標使用者**: 校園內部師生
+- **學生**: 使用學號 + 密碼登入，可使用 AI 對話、智能體、圖像生成等功能
+- **教師**: 可建立課程智能體、查看學生學習歷程、管理班級權限
+- **管理員**: 帳號管理、使用統計、系統設定
+
+**參考技術棧** (僅 UI，無後端):
 - Next.js 16 (App Router)
 - React 19
 - TypeScript 5.7
-- Tailwind CSS v4 (no `tailwind.config.js`, configured via `globals.css` `@theme inline`)
+- Tailwind CSS v4 (無 `tailwind.config.js`，透過 `globals.css` `@theme inline` 配置)
 - shadcn/ui (Radix UI primitives + CVA)
 - Lucide React icons
-- Fonts: Inter (Latin) + Noto Sans TC (Chinese)
+- Fonts: Inter (Latin) + Noto Sans TC (繁體中文)
 
-**Key Dependencies** (from `package.json`):
+**關鍵依賴** (from `package.json`):
 ```json
 {
   "next": "16.1.6",
@@ -34,326 +39,336 @@ You are a senior full-stack engineer. Your task is to migrate a complete UI desi
   "@radix-ui/react-*": "various",
   "class-variance-authority": "^0.7.1",
   "clsx": "^2.1.1",
-  "tailwind-merge": "^3.3.1",
-  "sonner": "^1.7.1",
-  "vaul": "^1.1.2",
-  "recharts": "2.15.0"
+  "tailwind-merge": "^3.3.1"
 }
 ```
 
 ---
 
-### 2. DESIGN SYSTEM (MUST PRESERVE)
+### 2. 設計系統 (必須保留)
 
-#### 2.1 Color Tokens (oklch format, in `app/globals.css`)
+#### 2.1 色彩 Token (oklch 格式，在 `app/globals.css`)
 
 ```
-Primary:    oklch(0.55 0.18 250)  — Blue, educational & trustworthy
-Accent:     oklch(0.70 0.15 180)  — Teal/cyan, complementary
-Background: oklch(0.99 0.002 240) — Near-white with blue tint
-Foreground: oklch(0.15 0.02 250)  — Near-black with blue tint
-Card:       oklch(1 0 0)          — Pure white
-Muted:      oklch(0.96 0.01 250)  — Light gray with blue tint
-Border:     oklch(0.92 0.01 250)  — Subtle border
+Primary:    oklch(0.55 0.18 250)  — 藍色，教育科技感、可信賴
+Accent:     oklch(0.70 0.15 180)  — 青綠色，輔助色
+Background: oklch(0.99 0.002 240) — 接近白色帶藍調
+Foreground: oklch(0.15 0.02 250)  — 接近黑色帶藍調
+Card:       oklch(1 0 0)          — 純白
+Muted:      oklch(0.96 0.01 250)  — 淺灰帶藍調
+Border:     oklch(0.92 0.01 250)  — 細微邊框
 ```
 
-Full dark mode tokens are also defined. See `globals.css` `:root` and `.dark` blocks.
+#### 2.2 角色色彩系統
 
-#### 2.2 Typography
+```
+學生 (Student):  藍色系 — bg-blue-100 text-blue-700 dark:bg-blue-900/30
+教師 (Teacher):  綠色系 — bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30
+管理員 (Admin):  紫色系 — bg-violet-100 text-violet-700 dark:bg-violet-900/30
+```
 
-- **Headings**: Inter (font-sans), weights 600-700
-- **Body**: Inter + Noto Sans TC fallback, weight 400-500
-- **Mono**: Geist Mono
-- Scale: H1=text-4xl/5xl/6xl, H2=text-3xl/4xl, H3=text-lg/xl, Body=text-sm/base, Caption=text-xs
+#### 2.3 Typography
 
-#### 2.3 Spacing & Layout
+- **標題**: Inter (font-sans), weights 600-700
+- **內文**: Inter + Noto Sans TC fallback, weight 400-500
+- **程式碼**: Geist Mono
+- 大小: H1=text-4xl/5xl, H2=text-2xl/3xl, H3=text-lg/xl, Body=text-sm/base, Caption=text-xs
 
-- Border radius: `--radius: 0.75rem` (12px)
-- Cards use `rounded-2xl` (16px)
-- Page containers: `max-w-7xl mx-auto px-4 lg:px-8`
-- App content: `max-w-4xl` or `max-w-6xl` depending on page
-- Section vertical padding: `py-20 lg:py-28`
-- Flexbox-first layout, Grid for multi-column
+#### 2.4 Spacing & Layout
 
-#### 2.4 Component Patterns
-
-- **Cards**: `rounded-2xl border border-border bg-card p-6 hover:border-primary/20 hover:shadow-md`
-- **Buttons**: shadcn Button with `min-h-[44px]` for touch targets
-- **Badge/Tag**: shadcn Badge with `variant="secondary"` for metadata
-- **Empty State**: Icon (opacity-30) + title + subtitle + optional CTA
-- **Loading State**: `Loader2` with `animate-spin` + contextual text
-- **Hover Effects**: `transition-all hover:shadow-lg hover:shadow-primary/5`
+- 圓角: `--radius: 0.75rem` (12px)
+- 卡片: `rounded-2xl` (16px)
+- 頁面容器: `max-w-4xl` 或 `max-w-6xl mx-auto px-4`
+- App sidebar: 256px 固定寬度
+- Mobile breakpoint: `lg:` (1024px)
 
 ---
 
-### 3. FILE STRUCTURE MAP
+### 3. 檔案結構
 
 ```
 app/
-  layout.tsx              # Root layout (fonts, metadata, SEO)
-  globals.css             # Design tokens, Tailwind v4 @theme
-  page.tsx                # Landing page (assembles 8 sections)
+  layout.tsx              # 根佈局 (字體、metadata、SEO)
+  globals.css             # 設計 Token、Tailwind v4 @theme
+  page.tsx                # 校園入口頁 (非行銷頁)
+  login/
+    page.tsx              # 登入頁 (支援學生/教師/管理員角色選擇)
   app/
-    layout.tsx            # App shell (sidebar + mobile nav)
-    page.tsx              # Chat / Conversation page
+    layout.tsx            # App Shell (側邊欄 + 角色導航)
+    page.tsx              # AI 對話頁
     memory/
-      page.tsx            # Memory / Knowledge base management
+      page.tsx            # 學習記憶管理
     agent-builder/
-      page.tsx            # Agent builder (templates, editor, tester)
+      page.tsx            # 智能體建立器
     marketplace/
-      page.tsx            # Agent marketplace / favorites
+      page.tsx            # 智能體市集
     image-gen/
-      page.tsx            # AI Image generation workbench
+      page.tsx            # AI 圖像生成
     image-edit/
-      page.tsx            # AI Image editing workbench
-
-components/
-  landing/
-    navbar.tsx            # Sticky top nav with mobile sheet
-    hero.tsx              # Hero section with product preview
-    features.tsx          # 6-feature grid
-    how-it-works.tsx      # 4-step process
-    examples.tsx          # Tabbed examples (chat/agents/images)
-    social-proof.tsx      # Stats + logos + testimonials
-    pricing.tsx           # 3-tier pricing (Free/Pro/School)
-    faq.tsx               # Accordion FAQ
-    footer.tsx            # 4-column footer + bottom bar
-  ui/
-    *.tsx                 # shadcn/ui primitives (56 components)
+      page.tsx            # AI 圖像編輯
+    teacher/
+      students/
+        page.tsx          # 教師專區：學生學習歷程
+      agents/
+        page.tsx          # 教師專區：課程智能體管理
+    admin/
+      users/
+        page.tsx          # 管理員：帳號管理
+      analytics/
+        page.tsx          # 管理員：使用統計
+      settings/
+        page.tsx          # 管理員：系統設定
 ```
 
 ---
 
-### 4. PAGE-BY-PAGE SPECIFICATION
+### 4. 頁面規格
 
-#### 4.1 Landing Page (`/`)
+#### 4.1 校園入口頁 (`/`)
 
-Assembles 8 sections in order:
-1. **Navbar** — Sticky, blur backdrop, logo + 5 nav links + CTA buttons. Mobile: Sheet sidebar.
-2. **Hero** — Badge announcement, H1 with `<span class="text-primary">` highlight, subtitle, 2 CTAs, 3 stat chips, product preview (mock chat window with 3 messages).
-3. **Features** — Section header + 6 cards in `sm:grid-cols-2 lg:grid-cols-3` grid. Each: icon in colored circle + title + description.
-4. **How It Works** — 4 steps in horizontal layout with connector lines. Each: icon circle + step number + title + description.
-5. **Examples** — Tabbed (Chat/Agents/Images). Chat: Q&A cards. Agents: card grid with icon, stats, tags. Images: gallery with style badges.
-6. **Social Proof** — 4 stats, 6 logo badges, 3 testimonial cards with avatar + rating stars.
-7. **Pricing** — 3 plans (Free NT$0, Pro NT$149/mo, School custom). "Most popular" badge on Pro. Feature checklists with Check icons.
-8. **FAQ** — Accordion with 6 items.
-9. **Footer** — 5-column: brand + 4 link groups (Product, Resources, Company, Legal).
+**不是行銷頁**，而是簡潔的校園入口：
+- **Header**: Logo + 平台名稱 + 登入按鈕
+- **Hero**: 校園徽章 + 標題「用 AI 助力學習」+ 副標題 + 「使用學校帳號登入」CTA
+- **Stats**: 3 個數據卡 (師生數/對話次數/智能體數)
+- **Features**: 4 個功能卡 (AI 對話/智能體/圖像生成/圖像編輯)
+- **Role Cards**: 3 個角色卡說明 (學生/教師/管理員各自的功能)
+- **Footer**: 簡潔的連結列
 
-#### 4.2 App Shell (`/app/layout.tsx`)
+#### 4.2 登入頁 (`/login`)
 
-- **Desktop**: 256px fixed sidebar (left) + main content area
-- **Mobile**: Hidden sidebar, Sheet-based slide-out via hamburger button in 56px top bar
-- **Sidebar Structure**:
-  - Logo (h-16 header)
-  - "New Chat" button
-  - 6 nav items: AI Chat, Memory, Agent Builder, Marketplace, Image Gen, Image Edit
-  - "Recent Chats" section (4 sample items)
-  - User section at bottom (avatar + name + plan + logout)
-- **Active State**: `bg-sidebar-accent text-sidebar-accent-foreground`
+- **角色選擇器**: 學生/教師/管理員 (Select dropdown)
+- **帳號輸入**: 學號/教職員編號/管理員帳號
+- **密碼輸入**: 含顯示/隱藏切換
+- **記住我**: Checkbox
+- **忘記密碼連結**
+- **Demo 測試帳號卡**: 顯示測試帳號資訊
 
-#### 4.3 Chat Page (`/app`)
+**登入後導向邏輯**:
+```ts
+const redirectPath = role === "admin" 
+  ? "/app/admin" 
+  : role === "teacher"
+  ? "/app/teacher"
+  : "/app"
+```
 
-- **Top bar**: Model selector (Select dropdown: LearnAI Pro / Fast / GPT-4 / Claude) + Memory management link
-- **Message area**: ScrollArea, max-w-3xl centered. AI messages: avatar circle + bubble. User messages: right-aligned primary-colored bubble.
-- **Suggestion chips**: 4 preset questions shown on empty state (`sm:grid-cols-2`)
-- **Message actions**: Copy, Like, Dislike, Regenerate buttons
-- **Input area**: Rounded container with attach button + auto-resize textarea + send button. Below: AI disclaimer text.
-- **States**: Loading (Loader2 spinner + "Thinking..."), Empty (suggestions grid)
+#### 4.3 App Shell (`/app/layout.tsx`)
 
-#### 4.4 Memory Page (`/app/memory`)
+**角色動態導航**:
 
-- **Header**: Brain icon + title + global memory toggle (Switch)
-- **Disabled banner**: Yellow warning when global memory is off
-- **Search + Filter**: Search input + category pill buttons (All / Learning Style / Progress / Interests / Personal / Language)
-- **Stats grid**: 3 cards (Total / Active / Categories) in `grid-cols-3`
-- **Memory list**: Cards with content + category badge + date + source. Each has individual Switch toggle + delete button.
-- **Empty state**: BookOpen icon + contextual message
+| 角色 | 基本導航 | 專屬導航 |
+|-----|---------|---------|
+| 學生 | AI 對話、學習記憶、智能體工作室、智能體市集、圖像生成、圖像編輯 | (無) |
+| 教師 | 同上 | + 學生學習歷程、課程智能體管理 |
+| 管理員 | 同上 | + 帳號管理、使用統計、系統設定 |
+
+**使用者資訊顯示**:
+- Avatar + 姓名 + 角色 Badge + 學號/編號
+- Dropdown menu: 個人設定、幫助中心、登出
+
+#### 4.4 學生核心頁面
+
+**AI 對話頁 (`/app`)**
+- 模型選擇器 (LearnAI Pro / Fast / GPT-4 / Claude)
+- 訊息區域 (AI 訊息有 avatar，使用者訊息靠右)
+- 建議問題 chips (首次進入時顯示)
+- 輸入區域 (附件按鈕 + textarea + 送出按鈕)
+
+**學習記憶頁 (`/app/memory`)**
+- 全域記憶開關
+- 分類篩選 (學習風格/進度/興趣/個人/語言)
+- 記憶卡片列表 (個別開關 + 刪除)
+
+**智能體建立器 (`/app/agent-builder`)**
+- 3 個 tabs: 我的智能體 / 模板庫 / 編輯器
+- 模板: 法律、醫學、程式、寫作、商業、空白
+- 編輯器: 基本設定 + 系統指令 + 工具權限 + 測試區
+
+**智能體市集 (`/app/marketplace`)**
+- 2 個 tabs: 探索 / 收藏
+- 分類: 人文/理科/工程/語言
+- 智能體卡片: icon + 名稱 + 描述 + tags + 使用數 + 評分
+
+**圖像生成/編輯** (保持原設計)
+
+#### 4.5 教師專區頁面
+
+**學生學習歷程 (`/app/teacher/students`)**
+- **統計卡**: 總學生數/本週活躍/總對話數/總智能體
+- **篩選**: 搜尋 + 班級選擇器
+- **學生表格**: 頭像+姓名+班級+對話數+智能體+圖像+狀態+操作
+- **詳情 Dialog**: 學生完整數據 + 查看對話/學習歷程按鈕
 
 **Data Shape**:
 ```ts
-interface MemoryItem {
+interface Student {
   id: string
-  content: string       // "Prefers metaphors for abstract concepts"
-  category: string      // "Learning Style" | "Progress" | "Interests" | "Personal" | "Language"
-  source: string        // "Inferred from chat" | "User provided"
+  name: string
+  studentId: string    // "S12345"
+  class: string        // "高一甲班"
+  totalChats: number
+  totalMessages: number
+  agentsCreated: number
+  imagesGenerated: number
+  lastActive: string
+  status: "active" | "idle" | "inactive"
+}
+```
+
+**課程智能體管理 (`/app/teacher/agents`)**
+- **統計卡**: 智能體數/總使用次數/授權班級
+- **智能體卡片**: icon + 名稱 + 課程 + 公開/限定 badge + 使用統計 + 授權班級 badges
+- **管理 Dialog**: 公開切換 + 授權班級選擇
+
+**Data Shape**:
+```ts
+interface CourseAgent {
+  id: string
+  name: string
+  description: string
+  course: string          // "程式設計概論"
+  icon: string
+  usageCount: number
+  studentCount: number
+  isPublic: boolean
+  allowedClasses: string[]
   createdAt: string
-  enabled: boolean
 }
 ```
 
-#### 4.5 Agent Builder (`/app/agent-builder`)
+#### 4.6 管理員專區頁面
 
-3 tabs: My Agents | Templates | Editor
-
-- **My Agents**: Grid with "Create New" dashed button + existing agent cards (icon, name, desc, status badge, edit/delete)
-- **Templates**: 6 cards (Legal, Medical, Code, Writing, Business, Blank). Click → prefills editor.
-- **Editor** (2-column layout):
-  - Left: Basic Settings card (name, description, model selector) + System Prompt card (textarea, mono font) + Tools & Permissions card (Web Search / Knowledge Base / Code Execution, each with Switch)
-  - Right: Test Area card with mock chat interface + input
-- **Action bar** (when editing): Cancel, Save, Publish buttons
+**帳號管理 (`/app/admin/users`)**
+- **統計卡**: 總帳號數/學生/教師/管理員
+- **篩選**: 搜尋 + 身份 + 狀態
+- **帳號表格**: 頭像+姓名+身份+班級/科別+狀態+最後登入+操作
+- **新增帳號 Dialog**: 姓名、帳號、身份、Email
+- **操作 Dropdown**: 編輯、重設密碼、停用/刪除
 
 **Data Shape**:
 ```ts
-interface AgentConfig {
-  name: string
-  description: string
-  systemPrompt: string
-  model: "learnai-pro" | "gpt-4" | "claude"
-  temperature: number
-  tools: {
-    webSearch: boolean
-    knowledgeBase: boolean
-    codeExecution: boolean
-  }
-  status: "draft" | "published"
-}
-```
-
-#### 4.6 Marketplace (`/app/marketplace`)
-
-- **Tabs**: Explore | Favorites (with count badge)
-- **Search**: Full-text search across name/description/tags
-- **Category pills**: All / Humanities / Science / Engineering / Language
-- **Agent cards**: Icon + favorite heart + name + description (line-clamp-2) + tags + stats (users + rating) + "Use" button + author
-- **Favorites empty state**: Heart icon + CTA to browse marketplace
-
-**Data Shape**:
-```ts
-interface MarketplaceAgent {
+interface UserAccount {
   id: string
   name: string
-  description: string
-  icon: LucideIcon
-  author: string
-  uses: string       // "12.5K"
-  rating: string     // "4.9"
-  tags: string[]
-  category: string
-  isFavorite: boolean
+  userId: string           // "S12345" | "T00001" | "admin"
+  role: "student" | "teacher" | "admin"
+  class?: string           // 學生專用
+  department?: string      // 教師專用
+  email?: string
+  status: "active" | "suspended" | "pending"
+  lastLogin: string
+  createdAt: string
 }
 ```
 
-#### 4.7 Image Generation (`/app/image-gen`)
+**使用統計 (`/app/admin/analytics`)**
+- **4 統計卡**: 總使用次數/活躍用戶/智能體使用/圖像生成 (含趨勢箭頭)
+- **時間範圍選擇器**: 7天/30天/90天/一年
+- **每日使用趨勢圖**: 長條圖
+- **功能使用分布**: 進度條 (AI對話 45%/智能體 28%/圖像 27%)
+- **熱門智能體排行**: 前 5 名
+- **活躍班級排行**: 前 5 名
 
-- **Tabs**: Generate | Gallery (with count badge)
-- **Generate tab** (2-column: main + 320px sidebar):
-  - Main: Prompt textarea + quick-tag buttons + Generate button. Below: preview/result area (square aspect ratio).
-  - Sidebar: Style grid (8 options, 2-col), Ratio selector, Quality slider (25-100), Quota indicator with progress bar.
-- **Gallery tab**: 3-column card grid. Each: square preview + style/ratio badges + timestamp + download/delete.
-- **States**: Generating (spinner animation + "10-30 seconds"), Empty gallery, Result preview with action buttons.
-
-#### 4.8 Image Editing (`/app/image-edit`)
-
-Full-height 3-panel layout:
-- **Left**: Tool sidebar (272px desktop, horizontal scroll mobile). 6 tools: Repaint, Style Transfer, Expand, Remove BG, Upscale, Object Remove.
-- **Center**: Toolbar (undo/redo/zoom) + Canvas area. Upload dropzone when no image. Tool-specific overlays.
-- **Right**: Contextual settings panel (272px, appears when tool selected + image loaded). Different controls per tool:
-  - Repaint: brush size slider + description textarea
-  - Style Transfer: 8 style buttons + intensity slider
-  - Expand: direction buttons + ratio slider
-  - Remove BG: one-click info
-  - Upscale: 2x/4x/8x buttons
-  - Object Remove: brush size slider
+**系統設定 (`/app/admin/settings`)**
+4 個 Tabs:
+1. **一般設定**: 平台名稱、學校名稱、歡迎訊息、使用限制
+2. **功能開關**: AI 對話/智能體/圖像生成/圖像編輯 + 學生權限
+3. **安全性**: 密碼政策、登入鎖定、Session 時間、資料保留
+4. **API 設定**: OpenAI/Anthropic API Key、預設模型
 
 ---
 
-### 5. MIGRATION INSTRUCTIONS
+### 5. 移植步驟
 
-Follow these steps in order:
+#### Step 1: 設定設計系統
+1. 複製 `globals.css` 色彩 token 到您的專案
+2. 如果使用 Tailwind v3，將 `@theme inline` 轉換為 `tailwind.config.js` 格式
+3. 安裝 Inter + Noto Sans TC 字體
+4. 確認所有需要的 shadcn/ui 元件已安裝
 
-#### Step 1: Setup Design System
-1. Copy `globals.css` color tokens into your existing CSS.
-2. If your project uses Tailwind v3, convert the `@theme inline` block to `tailwind.config.js` `extend.colors` format.
-3. Add Inter + Noto Sans TC fonts.
-4. Verify all shadcn/ui components needed are installed (Button, Badge, Tabs, Input, Textarea, Label, Select, Switch, Slider, Sheet, ScrollArea, Accordion, Avatar, Dialog, Tooltip).
+#### Step 2: 整合認證系統
+1. 實作登入頁的真實認證邏輯
+2. 設定角色 (student/teacher/admin) 的 session/token 儲存
+3. 實作路由保護 middleware
 
-#### Step 2: Integrate Landing Page
-1. Copy `components/landing/*.tsx` (9 files).
-2. Replace hardcoded links (`/app`) with your actual auth/login routes.
-3. Replace placeholder data (testimonials, stats, logos) with real data.
-4. Update pricing to match your actual plans and pricing.
-5. Update FAQ to match your product specifics.
-6. **Brand rename**: Find & replace "LearnAI" with your product name throughout.
+#### Step 3: 整合入口頁與登入頁
+1. 複製 `app/page.tsx` (校園入口頁)
+2. 複製 `app/login/page.tsx` (登入頁)
+3. 連接真實認證 API
 
-#### Step 3: Integrate App Shell
-1. Copy the sidebar layout pattern from `app/app/layout.tsx`.
-2. Map the 6 nav items to your actual routes.
-3. Replace the static "Recent Chats" with real data from your chat history API.
-4. Replace the static user section with your auth context/session.
+#### Step 4: 整合 App Shell
+1. 複製 `app/app/layout.tsx`
+2. 實作角色判斷邏輯 (從 auth context 取得)
+3. 連接真實使用者資訊
 
-#### Step 4: Integrate Core Pages
-For each page, follow this pattern:
-1. Copy the UI component structure.
-2. Replace `useState` mock data with real API calls (SWR recommended).
-3. Wire up interactive elements (buttons, forms, toggles) to your real API endpoints.
-4. Implement proper error boundaries and loading states (patterns already in the UI).
+#### Step 5: 整合各頁面
+每個頁面依照此模式：
+1. 複製 UI 元件結構
+2. 將 `useState` mock data 替換為真實 API 呼叫 (建議用 SWR)
+3. 連接互動元素到真實 API endpoints
+4. 實作錯誤處理和載入狀態
 
-**Specific integration points per page**:
+**各頁面 API 對應**:
 
-| Page | Replace Mock With | Key APIs Needed |
-|------|------------------|----------------|
-| Chat | Simulated timeout → Real AI streaming | POST /api/chat (streaming), GET /api/conversations |
-| Memory | Static array → DB query | GET/PUT/DELETE /api/memories |
-| Agent Builder | setTimeout → Real API | POST /api/agents, PUT /api/agents/:id, POST /api/agents/:id/test |
-| Marketplace | Static array → DB query | GET /api/marketplace, POST /api/favorites |
-| Image Gen | setTimeout → Real generation | POST /api/images/generate, GET /api/images |
-| Image Edit | setTimeout → Real processing | POST /api/images/edit, POST /api/images/upload |
-
-#### Step 5: Add Authentication
-The reference UI has no auth. You need to:
-1. Wrap `/app/*` routes with your auth middleware/guard.
-2. Replace the static user section in the sidebar with real user data.
-3. Add login/register pages (the landing "Login" and "Get Started" buttons point to `/app`).
-
-#### Step 6: Add Real-time Features
-1. Chat streaming: Replace the `setTimeout` mock in chat page with AI SDK `useChat` hook or SSE.
-2. Image generation progress: Replace static loading with real progress callbacks.
+| 頁面 | 需要的 API |
+|-----|-----------|
+| 登入 | POST /api/auth/login |
+| AI 對話 | POST /api/chat (streaming), GET /api/conversations |
+| 學習記憶 | GET/PUT/DELETE /api/memories |
+| 智能體建立器 | CRUD /api/agents |
+| 智能體市集 | GET /api/marketplace, POST /api/favorites |
+| 圖像生成 | POST /api/images/generate |
+| 圖像編輯 | POST /api/images/edit |
+| 學生歷程 (教師) | GET /api/teacher/students |
+| 課程智能體 (教師) | CRUD /api/teacher/agents |
+| 帳號管理 (管理員) | CRUD /api/admin/users |
+| 使用統計 (管理員) | GET /api/admin/analytics |
+| 系統設定 (管理員) | GET/PUT /api/admin/settings |
 
 ---
 
-### 6. IMPORTANT COMPATIBILITY NOTES
+### 6. 重要注意事項
 
-1. **Tailwind v4 vs v3**: The reference uses Tailwind v4 (`@theme inline` in CSS). If your project uses v3, you need to convert all design tokens to `tailwind.config.js` format. The utility classes themselves (`bg-primary`, `text-foreground`, etc.) are the same.
-
-2. **Next.js 16 specifics**: `params`, `searchParams`, `headers`, `cookies` must be `await`ed in Server Components. The reference uses `"use client"` for all interactive pages, so this mainly affects server-side data fetching you add.
-
-3. **shadcn/ui components**: The reference assumes all 56 shadcn components are installed. Only install what you need. Critical ones: Button, Badge, Input, Textarea, Label, Select, Tabs, Switch, Slider, Sheet, ScrollArea, Accordion, Avatar, Dialog.
-
-4. **Chinese content**: All UI text is in Traditional Chinese (zh-Hant). If you need i18n, extract all string literals into a locale file. Key strings are in:
-   - Landing: ~200 strings across 9 component files
-   - App: ~150 strings across 7 page/layout files
-
-5. **Icons**: All icons use `lucide-react`. If your project uses a different icon library, you need to map ~60 unique icons.
+1. **角色權限控制**: 必須在 API 層級驗證角色權限，不只是前端隱藏
+2. **學校帳號整合**: 可能需要對接學校的 LDAP/AD 或 SSO 系統
+3. **Tailwind v4 vs v3**: 參考專案使用 v4，如果您的專案用 v3 需要轉換 token 格式
+4. **繁體中文**: 所有 UI 文字都是繁體中文，如需 i18n 請提取字串
 
 ---
 
-### 7. QUICK START CHECKLIST
+### 7. 快速檢查清單
 
-- [ ] Clone reference repo and run `pnpm install && pnpm dev` to see the UI
-- [ ] Copy `globals.css` design tokens into your project
-- [ ] Install missing shadcn/ui components
-- [ ] Copy landing components → adjust routes, branding, content
-- [ ] Copy app layout → wire up real auth and nav routes
-- [ ] Copy each page → replace mock data with real API calls
-- [ ] Add authentication layer
-- [ ] Add real AI streaming for chat
-- [ ] Add real image generation/editing API integration
-- [ ] Replace all "LearnAI" branding with your product name
-- [ ] Test responsive layout (mobile sidebar, touch targets)
-- [ ] Test dark mode if applicable
+- [ ] Clone 參考 repo 並執行 `pnpm install && pnpm dev` 查看 UI
+- [ ] 複製設計 token 到您的專案
+- [ ] 安裝缺少的 shadcn/ui 元件
+- [ ] 實作認證系統 (學號密碼登入)
+- [ ] 複製入口頁和登入頁
+- [ ] 複製 App Shell (含角色導航)
+- [ ] 複製學生核心頁面 (對話/記憶/智能體/圖像)
+- [ ] 複製教師專區頁面 (學生歷程/課程智能體)
+- [ ] 複製管理員專區頁面 (帳號/統計/設定)
+- [ ] 連接所有真實 API
+- [ ] 測試響應式佈局 (手機/平板/桌面)
+- [ ] 測試各角色的權限控制
 
 ---
 
-### 8. REFERENCE SCREENSHOTS MAPPING
+### 8. 路由對照表
 
-| Route | What You'll See | File |
-|-------|----------------|------|
-| `/` | Full landing page (scroll) | `app/page.tsx` |
-| `/app` | Chat interface with sidebar | `app/app/page.tsx` |
-| `/app/memory` | Memory management grid | `app/app/memory/page.tsx` |
-| `/app/agent-builder` | Agent builder with 3 tabs | `app/app/agent-builder/page.tsx` |
-| `/app/marketplace` | Agent marketplace cards | `app/app/marketplace/page.tsx` |
-| `/app/image-gen` | Image generation workbench | `app/app/image-gen/page.tsx` |
-| `/app/image-edit` | Image editing 3-panel layout | `app/app/image-edit/page.tsx` |
+| 路由 | 說明 | 權限 |
+|-----|------|-----|
+| `/` | 校園入口頁 | 公開 |
+| `/login` | 登入頁 | 公開 |
+| `/app` | AI 對話 | 登入用戶 |
+| `/app/memory` | 學習記憶 | 登入用戶 |
+| `/app/agent-builder` | 智能體建立器 | 登入用戶 |
+| `/app/marketplace` | 智能體市集 | 登入用戶 |
+| `/app/image-gen` | 圖像生成 | 登入用戶 |
+| `/app/image-edit` | 圖像編輯 | 登入用戶 |
+| `/app/teacher/students` | 學生學習歷程 | 教師+ |
+| `/app/teacher/agents` | 課程智能體管理 | 教師+ |
+| `/app/admin/users` | 帳號管理 | 管理員 |
+| `/app/admin/analytics` | 使用統計 | 管理員 |
+| `/app/admin/settings` | 系統設定 | 管理員 |
 
 ## PROMPT END
